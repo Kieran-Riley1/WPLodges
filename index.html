@@ -62,9 +62,14 @@
                 scroll-behavior: smooth;
             }
 
+            html {
+                overscroll-behavior: none;
+            }
+
             body {
                 color: theme('colors.secondary');
                 font-family: 'Trirong', serif;
+                overscroll-behavior: none;
             }
 
             a {
@@ -215,9 +220,7 @@
     <!-- Intro: white screen, the title "writes" on, then crossfades into the hero -->
     <div id="intro" class="fixed inset-0 z-[100] flex items-center justify-center bg-white">
         <div class="relative mx-auto flex max-w-[820px] flex-col items-center px-6 text-center">
-            <span class="mb-9 text-sm uppercase tracking-[0.3em] opacity-0" aria-hidden="true">Holiday Lodges
-                &middot; County Durham</span>
-            <h1 class="font-display leading-[1.05] text-secondary text-[clamp(2.25rem,5.5vw,3.75rem)]">
+            <h1 class="font-display leading-[1.25] text-secondary text-[clamp(2.25rem,5.5vw,3.75rem)]">
                 <span class="block"><span class="intro-line inline-block" style="--d:0s">Woodlands Park</span></span>
                 <span class="block"><span class="intro-line inline-block" style="--d:.55s">Lodges</span></span>
             </h1>
@@ -294,6 +297,7 @@
                     <li><a href="#lodges" class="block px-6 py-4 uppercase text-secondary tracking-wide">The Lodges</a></li>
                     <li><a href="#gallery" class="block px-6 py-4 uppercase text-secondary tracking-wide">Gallery</a></li>
                     <li><a href="#amenitites" class="block px-6 py-4 uppercase text-secondary tracking-wide">Amenities</a></li>
+                    <li><a href="#reviews" class="block px-6 py-4 uppercase text-secondary tracking-wide">Reviews</a></li>
                     <li><a href="#contact" class="block px-6 py-4 uppercase text-secondary tracking-wide">Contact</a></li>
                 </ul>
                 <div class="flex items-center justify-center gap-6 px-6 py-5 border-t border-[#eee] text-[22px]">
@@ -324,8 +328,7 @@
 
         <!-- Hero content -->
         <div class="relative z-10 mx-auto flex max-w-[820px] flex-col items-center px-6 text-center text-white">
-            <span class="reveal mb-9 text-sm uppercase tracking-[0.3em] text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.6)]" style="--rd:.05s">Holiday Lodges &middot; County Durham</span>
-            <h1 class="font-display leading-[1.05] drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)] text-[clamp(2.25rem,5.5vw,3.75rem)]">
+            <h1 class="font-display leading-[1.25] drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)] text-[clamp(2.25rem,5.5vw,3.75rem)]">
                 <span class="block"><span class="inline-block">Woodlands Park</span></span>
                 <span class="block"><span class="inline-block">Lodges</span></span>
             </h1>
@@ -626,6 +629,155 @@
 
 
 
+    <section id="reviews" class="bg-[#f8f8f7] px-6 py-20 max-[745px]:py-16">
+        <!-- Section header -->
+        <div class="scroll mx-auto flex max-w-[700px] flex-col items-center text-center">
+            <img src="images/woodlandsparklogonotext.png" alt="" class="w-[130px] opacity-40">
+            <span class="mt-5 text-xs font-bold uppercase tracking-[0.28em] text-secondary/55">Guest Reviews</span>
+            <h2 class="mt-3 font-heading leading-tight text-secondary text-[clamp(1.75rem,3.4vw,2.4rem)]">
+                What our guests say
+            </h2>
+            <p class="mt-4 text-base font-thin leading-relaxed text-secondary/70">
+                We love welcoming guests to Woodlands Park Lodges. Here&rsquo;s what some of them have said about their
+                stay.
+            </p>
+        </div>
+
+        <!-- Carousel -->
+        <div class="scroll mx-auto mt-12 max-w-[1180px]">
+            <div class="relative md:px-16">
+                <button id="revPrev" type="button" aria-label="Previous reviews"
+                    class="absolute left-0 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-secondary/20 bg-white text-secondary shadow-sm transition hover:bg-secondary hover:text-white md:flex">
+                    <i class="fa fa-angle-left text-xl"></i>
+                </button>
+                <button id="revNext" type="button" aria-label="Next reviews"
+                    class="absolute right-0 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-secondary/20 bg-white text-secondary shadow-sm transition hover:bg-secondary hover:text-white md:flex">
+                    <i class="fa fa-angle-right text-xl"></i>
+                </button>
+
+                <div id="reviewsTrack"
+                    class="flex gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+
+                    <figure
+                        class="reviewSlide snap-start shrink-0 w-[86%] sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] flex flex-col rounded-2xl border border-black/[0.06] bg-white p-8 shadow-[0_12px_30px_-22px_rgba(0,0,0,0.22)]">
+                        <i class="fa fa-quote-left text-3xl text-chestnut/70"></i>
+                        <blockquote class="mt-4 flex-1 text-[17px] font-thin leading-[25px] text-secondary/80">
+                            Cherry Lodge is a large, well-designed lodge with a hot tub, and the owners were so
+                            welcoming. The brilliant welcome pack was full of quality products &mdash; would highly
+                            recommend.
+                        </blockquote>
+                        <figcaption class="mt-6 flex items-center gap-3">
+                            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-chestnut/15 text-sm font-bold text-chestnut">TC</span>
+                            <div>
+                                <p class="text-[15px] font-semibold text-secondary">Trusted Customer</p>
+                                <div class="mt-0.5 flex gap-0.5 text-[11px] text-cherry">
+                                    <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i>
+                                </div>
+                            </div>
+                        </figcaption>
+                    </figure>
+
+                    <figure
+                        class="reviewSlide snap-start shrink-0 w-[86%] sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] flex flex-col rounded-2xl border border-black/[0.06] bg-white p-8 shadow-[0_12px_30px_-22px_rgba(0,0,0,0.22)]">
+                        <i class="fa fa-quote-left text-3xl text-cherry/80"></i>
+                        <blockquote class="mt-4 flex-1 text-[17px] font-thin leading-[25px] text-secondary/80">
+                            Excellent value for money &mdash; so clean and tidy, and a very large lodge, which was a
+                            lovely surprise.
+                        </blockquote>
+                        <figcaption class="mt-6 flex items-center gap-3">
+                            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-cherry/15 text-sm font-bold text-cherry">R</span>
+                            <div>
+                                <p class="text-[15px] font-semibold text-secondary">Rachel</p>
+                                <div class="mt-0.5 flex gap-0.5 text-[11px] text-cherry">
+                                    <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star-o"></i>
+                                </div>
+                            </div>
+                        </figcaption>
+                    </figure>
+
+                    <figure
+                        class="reviewSlide snap-start shrink-0 w-[86%] sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] flex flex-col rounded-2xl border border-black/[0.06] bg-white p-8 shadow-[0_12px_30px_-22px_rgba(0,0,0,0.22)]">
+                        <i class="fa fa-quote-left text-3xl text-chestnut/70"></i>
+                        <blockquote class="mt-4 flex-1 text-[17px] font-thin leading-[25px] text-secondary/80">
+                            We stayed in Cherry Lodge with a hot tub. My husband needed an accessible bathroom and it
+                            was lovely &mdash; the ramp entry made everything easy. Beamish museum is close by and
+                            amazing.
+                        </blockquote>
+                        <figcaption class="mt-6 flex items-center gap-3">
+                            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-chestnut/15 text-sm font-bold text-chestnut">J</span>
+                            <div>
+                                <p class="text-[15px] font-semibold text-secondary">Jane</p>
+                                <div class="mt-0.5 flex gap-0.5 text-[11px] text-cherry">
+                                    <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i>
+                                </div>
+                            </div>
+                        </figcaption>
+                    </figure>
+
+                    <figure
+                        class="reviewSlide snap-start shrink-0 w-[86%] sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] flex flex-col rounded-2xl border border-black/[0.06] bg-white p-8 shadow-[0_12px_30px_-22px_rgba(0,0,0,0.22)]">
+                        <i class="fa fa-quote-left text-3xl text-cherry/80"></i>
+                        <blockquote class="mt-4 flex-1 text-[17px] font-thin leading-[25px] text-secondary/80">
+                            Beautiful lodge with an amazing welcome pack and great communication from the owners. All
+                            the little touches that are so often missed elsewhere.
+                        </blockquote>
+                        <figcaption class="mt-6 flex items-center gap-3">
+                            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-cherry/15 text-sm font-bold text-cherry">M</span>
+                            <div>
+                                <p class="text-[15px] font-semibold text-secondary">Michael</p>
+                                <div class="mt-0.5 flex gap-0.5 text-[11px] text-cherry">
+                                    <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i>
+                                </div>
+                            </div>
+                        </figcaption>
+                    </figure>
+
+                    <figure
+                        class="reviewSlide snap-start shrink-0 w-[86%] sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] flex flex-col rounded-2xl border border-black/[0.06] bg-white p-8 shadow-[0_12px_30px_-22px_rgba(0,0,0,0.22)]">
+                        <i class="fa fa-quote-left text-3xl text-chestnut/70"></i>
+                        <blockquote class="mt-4 flex-1 text-[17px] font-thin leading-[25px] text-secondary/80">
+                            We&rsquo;ve just spent another wonderful two-week family break at the beautiful, peaceful
+                            Chestnut Lodge. Highly recommend &mdash; already looking at returning next year.
+                        </blockquote>
+                        <figcaption class="mt-6 flex items-center gap-3">
+                            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-chestnut/15 text-sm font-bold text-chestnut">TC</span>
+                            <div>
+                                <p class="text-[15px] font-semibold text-secondary">Trusted Customer</p>
+                                <div class="mt-0.5 flex gap-0.5 text-[11px] text-cherry">
+                                    <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i>
+                                </div>
+                            </div>
+                        </figcaption>
+                    </figure>
+
+                    <figure
+                        class="reviewSlide snap-start shrink-0 w-[86%] sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] flex flex-col rounded-2xl border border-black/[0.06] bg-white p-8 shadow-[0_12px_30px_-22px_rgba(0,0,0,0.22)]">
+                        <i class="fa fa-quote-left text-3xl text-cherry/80"></i>
+                        <blockquote class="mt-4 flex-1 text-[17px] font-thin leading-[25px] text-secondary/80">
+                            A lovely lodge that went beyond our expectations &mdash; peaceful and perfect for us. It
+                            really suited our autistic grandson, who loved it.
+                        </blockquote>
+                        <figcaption class="mt-6 flex items-center gap-3">
+                            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-cherry/15 text-sm font-bold text-cherry">TC</span>
+                            <div>
+                                <p class="text-[15px] font-semibold text-secondary">Trusted Customer</p>
+                                <div class="mt-0.5 flex gap-0.5 text-[11px] text-cherry">
+                                    <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i>
+                                </div>
+                            </div>
+                        </figcaption>
+                    </figure>
+
+                </div>
+            </div>
+
+            <div id="reviewsDots" class="mt-8 flex items-center justify-center gap-2"></div>
+            <p class="mt-6 text-center text-xs text-secondary/45">
+                * Reviews from our verified guests on Hoseasons.
+            </p>
+        </div>
+    </section>
+
     <section id="contact" class="bg-white px-6 py-20 max-[745px]:py-14">
         <div class="scroll mx-auto max-w-[1140px]">
             <!-- Header -->
@@ -656,7 +808,7 @@
                 </div>
 
                 <!-- Details panel -->
-                <div class="flex flex-col rounded-2xl border border-black/[0.07] bg-[#f8f8f7] p-8 md:p-10 shadow-[0_12px_30px_-22px_rgba(0,0,0,0.18)]">
+                <div class="flex flex-col rounded-2xl border border-black/[0.07] bg-white p-8 md:p-10 shadow-[0_12px_30px_-22px_rgba(0,0,0,0.18)]">
                     <!-- Visit us -->
                     <div class="flex items-start gap-4">
                         <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-secondary/10 text-secondary">
@@ -746,6 +898,9 @@
                         </li>
                         <li><a href="#amenitites"
                                 class="text-sm uppercase tracking-wide text-white/65 transition-colors hover:text-white">Amenities</a>
+                        </li>
+                        <li><a href="#reviews"
+                                class="text-sm uppercase tracking-wide text-white/65 transition-colors hover:text-white">Reviews</a>
                         </li>
                         <li><a href="#contact"
                                 class="text-sm uppercase tracking-wide text-white/65 transition-colors hover:text-white">Contact</a>

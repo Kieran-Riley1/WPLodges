@@ -122,6 +122,88 @@ if (menuToggle && mobileMenu) {
 }
 
 
+// Reviews carousel (scroll-snap track + arrow buttons + dots)
+(function () {
+    const track = document.getElementById("reviewsTrack");
+    if (!track) return;
+    const slides = Array.from(track.querySelectorAll(".reviewSlide"));
+    if (!slides.length) return;
+    const prev = document.getElementById("revPrev");
+    const next = document.getElementById("revNext");
+    const dotsWrap = document.getElementById("reviewsDots");
+    const gap = 24; // matches gap-6
+
+    const step = () => slides[0].getBoundingClientRect().width + gap;
+    const perView = () => Math.max(1, Math.round(track.clientWidth / step()));
+    const pages = () => Math.max(1, slides.length - perView() + 1);
+    const activeIndex = () => Math.round(track.scrollLeft / step());
+
+    const sync = () => {
+        if (!dotsWrap) return;
+        const a = activeIndex();
+        Array.from(dotsWrap.children).forEach((d, i) => {
+            d.className = "h-2 rounded-full transition-all duration-300 " +
+                (i === a ? "w-5 bg-secondary/70" : "w-2 bg-secondary/25");
+        });
+    };
+    // Autoplay: advance every 10s, loop at the end. Only runs while the section
+    // is on screen (skipped for reduced-motion), so visitors always start at card 1.
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let timer = null;
+    let visible = false;
+    const stop = () => { if (timer) { clearInterval(timer); timer = null; } };
+    const goNext = () => {
+        const atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 4;
+        if (atEnd) track.scrollTo({ left: 0, behavior: "smooth" });
+        else track.scrollBy({ left: step(), behavior: "smooth" });
+    };
+    const start = () => { if (reduce || !visible) return; stop(); timer = setInterval(goNext, 10000); };
+
+    const buildDots = () => {
+        if (!dotsWrap) return;
+        dotsWrap.innerHTML = "";
+        for (let i = 0; i < pages(); i++) {
+            const d = document.createElement("button");
+            d.type = "button";
+            d.setAttribute("aria-label", "Go to review " + (i + 1));
+            d.addEventListener("click", () => { track.scrollTo({ left: i * step(), behavior: "smooth" }); start(); });
+            dotsWrap.appendChild(d);
+        }
+        sync();
+    };
+
+    if (prev) prev.addEventListener("click", () => { track.scrollBy({ left: -step(), behavior: "smooth" }); start(); });
+    if (next) next.addEventListener("click", () => { goNext(); start(); });
+
+    // Pause while the visitor is interacting
+    const root = document.getElementById("reviews") || track;
+    root.addEventListener("mouseenter", stop);
+    root.addEventListener("mouseleave", start);
+    track.addEventListener("touchstart", stop, { passive: true });
+
+    let st;
+    track.addEventListener("scroll", () => { clearTimeout(st); st = setTimeout(sync, 80); });
+    let rt;
+    window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(buildDots, 150); });
+
+    buildDots();
+
+    // Only autoplay once the reviews are scrolled into view; pause when they leave
+    if ("IntersectionObserver" in window) {
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach((e) => {
+                visible = e.isIntersecting;
+                if (visible) start(); else stop();
+            });
+        }, { threshold: 0.35 });
+        io.observe(root);
+    } else {
+        visible = true;
+        start();
+    }
+})();
+
+
 const openPdfButton = document.getElementById("openPdfButton");
 
 // Add a click event listener to the button
