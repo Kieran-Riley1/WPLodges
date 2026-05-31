@@ -41,8 +41,8 @@ window.addEventListener('scroll', function() {
     const mapEl = document.getElementById("map");
     if (!mapEl || typeof L === "undefined") return;
 
-    const lat = 54.81768317761617;
-    const lng = -1.8186773671425782;
+    const lat = 54.816665;
+    const lng = -1.831994;
 
     const map = L.map(mapEl, {
         scrollWheelZoom: false, // don't hijack page scroll
