@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Woodlands Park Lodges | Holiday Lodges in County Durham</title>
+    <meta name="robots" content="index">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--     --------------------    TODO: Chris to add these:           --------------------            -->
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="images/wpflogo/favicon.ico">
+
+    <!-- Icons & fonts (unchanged from original) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.cdnfonts.com/css/gellatio-personal-use" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+
+    <!-- Leaflet (free, open-source map; no API key) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link
+        href="https://www.dafontfree.net/embed/ZW5ncmF2ZXJzZ290aGljLWJ0LXJlZ3VsYXImZGF0YS8yNC9lLzEyMzIzNS9FbmdyYXZlcnNHb3RoaWNCVC50dGY"
+        rel="stylesheet" type="text/css">
+
+    <!-- Tailwind CSS (Play CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        secondary: '#1C1715',
+                        body: '#ffffff',
+                        cherry: '#D6A21E',
+                        chestnut: '#1496A4',
+                    },
+                    fontFamily: {
+                        serif: ['Trirong', 'serif'],
+                        display: ['"Gellatio Personal Use"', 'sans-serif'],
+                        heading: ['"Playfair Display"', 'serif'],
+                        script: ['Caveat', 'cursive'],
+                    },
+                },
+            },
+        };
+    </script>
+
+    <!-- Custom styles that can't be expressed purely as utility classes:
+         global base rules, the reusable .button component, the JS-toggled
+         scroll states (.nav-active / .info-active), and the entry keyframe. -->
+    <style type="text/tailwindcss">
+        @layer base {
+
+            *,
+            *::before,
+            *::after {
+                letter-spacing: 0.2px !important;
+                scroll-behavior: smooth;
+            }
+
+            body {
+                color: theme('colors.secondary');
+                font-family: 'Trirong', serif;
+            }
+
+            a {
+                text-decoration: none;
+                color: #000;
+            }
+
+            hr {
+                width: 200px;
+                margin-top: 30px;
+            }
+        }
+
+        @layer components {
+            .button {
+                @apply text-secondary text-[13px] leading-6 font-bold text-center bg-transparent border border-secondary min-w-[118px] py-[10px] px-[24px] inline-block align-middle uppercase relative transition-all duration-500 rounded-[10px] cursor-pointer;
+            }
+
+            .button:hover {
+                @apply bg-secondary text-white;
+            }
+        }
+
+        /* Navbar background that fades in on scroll (toggled by main.js) */
+        #navbar.nav-active {
+            box-shadow: 0 -2px 11px #0005;
+            background: #fff !important;
+        }
+
+        /* Adaptive navbar: white logo/icons/button over the hero, dark once it turns solid */
+        #navbar .logo img,
+        #navbar ul li a,
+        #navbar #menuToggle,
+        #navbar .button {
+            transition: color .4s ease, filter .4s ease, background .4s ease, border-color .4s ease;
+        }
+
+        #navbar:not(.nav-active) .logo img {
+            filter: brightness(0) invert(1);
+        }
+
+        #navbar:not(.nav-active) ul li a,
+        #navbar:not(.nav-active) #menuToggle {
+            color: #fff;
+        }
+
+        #navbar:not(.nav-active) .button {
+            color: #fff;
+            border-color: #fff;
+        }
+
+        #navbar:not(.nav-active) .button:hover {
+            background: #fff;
+            color: #1C1715;
+        }
+
+        /* Intro overlay: the script title "writes" on, then the white screen
+           crossfades away to reveal the identically-placed white hero title. */
+        #intro {
+            transition: opacity 0.8s ease;
+        }
+
+        #intro.intro-hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .intro-line {
+            clip-path: inset(-0.6em 100% -0.6em -0.15em);
+            animation: write 0.85s cubic-bezier(0.6, 0.2, 0.2, 1) forwards;
+            animation-delay: var(--d, 0s);
+        }
+
+        @keyframes write {
+            to {
+                clip-path: inset(-0.6em -0.15em -0.6em -0.15em);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .intro-line {
+                animation: none;
+                clip-path: none;
+            }
+        }
+
+        /* Hero elements reveal in around the title once the intro finishes */
+        .reveal {
+            opacity: 0;
+            transform: translateY(14px);
+        }
+
+        body.intro-ready .reveal {
+            animation: revealIn 0.7s ease-out forwards;
+            animation-delay: var(--rd, 0s);
+        }
+
+        @keyframes revealIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .reveal {
+                opacity: 1 !important;
+                transform: none !important;
+                animation: none !important;
+            }
+        }
+
+        /* Mobile slide-down menu (toggled by main.js) */
+        #mobileMenu {
+            display: none;
+        }
+
+        #mobileMenu.open {
+            display: block;
+            animation: 0.25s ease-out slideDown;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* The hamburger + its menu only exist on mobile */
+        @media only screen and (min-width: 746px) {
+
+            #menuToggle,
+            #mobileMenu {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Intro: white screen, the title "writes" on, then crossfades into the hero -->
+    <div id="intro" class="fixed inset-0 z-[100] flex items-center justify-center bg-white">
+        <div class="relative mx-auto flex max-w-[820px] flex-col items-center px-6 text-center">
+            <span class="mb-9 text-sm uppercase tracking-[0.3em] opacity-0" aria-hidden="true">Holiday Lodges
+                &middot; County Durham</span>
+            <h1 class="font-display leading-[1.05] text-secondary text-[clamp(2.25rem,5.5vw,3.75rem)]">
+                <span class="block"><span class="intro-line inline-block" style="--d:0s">Woodlands Park</span></span>
+                <span class="block"><span class="intro-line inline-block" style="--d:.55s">Lodges</span></span>
+            </h1>
+            <p class="mt-6 max-w-[640px] text-base md:text-lg font-thin leading-relaxed opacity-0" aria-hidden="true">
+                Discover the charm of Woodlands Park Lodges. Set among peaceful farmland and woodland, both Chestnut
+                and Cherry lodge offer a calm, tranquil space to enjoy the countryside.
+            </p>
+            <div class="mt-9 flex flex-wrap items-center justify-center gap-4 opacity-0" aria-hidden="true">
+                <button type="button" class="rounded-[10px] px-7 py-3 text-sm font-bold uppercase tracking-wide">Book
+                    Now</button>
+                <button type="button" class="rounded-[10px] border px-7 py-3 text-sm font-bold uppercase tracking-wide">Explore
+                    the Lodges</button>
+            </div>
+        </div>
+    </div>
+
+    <header class="sticky top-0 z-10">
+        <nav id="navbar" class="navbar absolute w-full py-[8px] bg-transparent transition-all duration-1000">
+            <div
+                class="reveal flex items-center justify-between w-[80%] max-[745px]:w-[94%] max-[745px]:mt-[8px] max-w-[1140px] mx-auto relative min-h-[48px] transition-all duration-1000"
+                style="--rd:.1s">
+                <div>
+                    <a class="logo" href="index.html">
+                        <img src="images/LodgesLogo.png" class="w-[124px] absolute top-[-5px] grayscale">
+                    </a>
+                </div>
+                <div class="flex justify-end items-center">
+                    <ul class="flex items-center list-none max-[745px]:hidden">
+                        <li
+                            class="group px-5 max-[745px]:px-[10px] relative transition-all duration-500 border-r border-[#9d9d9d] last:border-r-0">
+                            <a href="https://www.facebook.com/profile.php?id=100090841733887" target="_blank"
+                                class="text-secondary inline-block outline-none transition-all duration-500 text-xl group-hover:scale-110">
+                                <i class="fa fa-facebook"></i></a>
+                        </li>
+                        <li
+                            class="group px-5 max-[745px]:px-[10px] relative transition-all duration-500 border-r border-[#9d9d9d] last:border-r-0">
+                            <a href="https://www.instagram.com/woodlandspark_lodges" target="_blank"
+                                class="text-secondary inline-block outline-none transition-all duration-500 text-xl group-hover:scale-110">
+                                <i class="fa fa-instagram"></i>
+                            </a>
+                        </li>
+                        <li
+                            class="group px-5 max-[745px]:px-[10px] relative transition-all duration-500 border-r border-[#9d9d9d] last:border-r-0">
+                            <a href="mailto:bookings@wpfarm.co.uk"
+                                class="text-secondary inline-block outline-none transition-all duration-500 text-xl group-hover:scale-110">
+                                <i class="fa fa-envelope-o"></i></a>
+                        </li>
+                        <li
+                            class="group px-5 max-[745px]:px-[10px] relative transition-all duration-500 border-r border-[#9d9d9d] last:border-r-0">
+                            <a href="tel:07900727699"
+                                class="text-secondary inline-block outline-none transition-all duration-500 text-xl group-hover:scale-110">
+                                <i class="fa fa-whatsapp"></i></a>
+                        </li>
+                    </ul>
+                    <a href="https://www.hoseasons.co.uk/accom/haystax-holiday-lodges-hhll" target="_blank"
+                        class="max-[745px]:hidden">
+                        <button type="button" class="button ml-[10px]">Book Now</button>
+                    </a>
+
+                    <!-- Mobile hamburger / kebab menu trigger -->
+                    <button id="menuToggle" type="button" aria-label="Open menu" aria-expanded="false"
+                        aria-controls="mobileMenu"
+                        class="inline-flex items-center justify-center w-11 h-11 text-secondary text-[26px] leading-none">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile slide-down menu -->
+            <div id="mobileMenu" class="mt-[15px] mx-auto w-[94%] rounded-[10px] bg-white shadow-[0_10px_30px_-8px_rgba(0,0,0,0.35)] overflow-hidden">
+                <ul class="flex flex-col list-none divide-y divide-[#eee]">
+                    <li><a href="#home" class="block px-6 py-4 uppercase text-secondary tracking-wide">Home</a></li>
+                    <li><a href="#about" class="block px-6 py-4 uppercase text-secondary tracking-wide">About</a></li>
+                    <li><a href="#lodges" class="block px-6 py-4 uppercase text-secondary tracking-wide">The Lodges</a></li>
+                    <li><a href="#gallery" class="block px-6 py-4 uppercase text-secondary tracking-wide">Gallery</a></li>
+                    <li><a href="#amenitites" class="block px-6 py-4 uppercase text-secondary tracking-wide">Amenities</a></li>
+                    <li><a href="#contact" class="block px-6 py-4 uppercase text-secondary tracking-wide">Contact</a></li>
+                </ul>
+                <div class="flex items-center justify-center gap-6 px-6 py-5 border-t border-[#eee] text-[22px]">
+                    <a href="https://www.facebook.com/profile.php?id=100090841733887" target="_blank"
+                        class="text-secondary"><i class="fa fa-facebook"></i></a>
+                    <a href="https://www.instagram.com/woodlandspark_lodges" target="_blank"
+                        class="text-secondary"><i class="fa fa-instagram"></i></a>
+                    <a href="mailto:bookings@wpfarm.co.uk" class="text-secondary"><i class="fa fa-envelope-o"></i></a>
+                    <a href="tel:07900727699" class="text-secondary"><i class="fa fa-whatsapp"></i></a>
+                </div>
+                <div class="px-6 pb-6">
+                    <a href="https://www.hoseasons.co.uk/accom/haystax-holiday-lodges-hhll" target="_blank">
+                        <button type="button" class="button w-full">Book Now</button>
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <section id="home" class="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <!-- Background image -->
+        <img src="images/hero.png"
+            alt="Woodlands Park lodge with a private hot tub and decking overlooking the countryside"
+            class="absolute inset-0 w-full h-full object-cover">
+        <!-- Legibility overlays: bottom gradient + soft scrim behind the centred text -->
+        <div class="absolute inset-0 bg-gradient-to-b from-black/45 via-black/35 to-black/70"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_62%_52%_at_50%_44%,rgba(0,0,0,0.55),transparent_72%)]"></div>
+
+        <!-- Hero content -->
+        <div class="relative z-10 mx-auto flex max-w-[820px] flex-col items-center px-6 text-center text-white">
+            <span class="reveal mb-9 text-sm uppercase tracking-[0.3em] text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.6)]" style="--rd:.05s">Holiday Lodges &middot; County Durham</span>
+            <h1 class="font-display leading-[1.05] drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)] text-[clamp(2.25rem,5.5vw,3.75rem)]">
+                <span class="block"><span class="inline-block">Woodlands Park</span></span>
+                <span class="block"><span class="inline-block">Lodges</span></span>
+            </h1>
+            <p class="reveal mt-6 max-w-[640px] text-base md:text-lg font-thin leading-relaxed text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.55)]" style="--rd:.22s">
+                Discover the charm of Woodlands Park Lodges. Set among peaceful farmland and woodland, both Chestnut
+                and Cherry lodge offer a calm, tranquil space to enjoy the countryside.
+            </p>
+            <div class="reveal mt-9 flex flex-wrap items-center justify-center gap-4" style="--rd:.38s">
+                <a href="https://www.hoseasons.co.uk/accom/haystax-holiday-lodges-hhll" target="_blank">
+                    <button type="button"
+                        class="rounded-[10px] bg-white px-7 py-3 text-sm font-bold uppercase tracking-wide text-secondary transition-all duration-500 hover:bg-white/90 cursor-pointer">
+                        Book Now
+                    </button>
+                </a>
+                <a href="#lodges">
+                    <button type="button"
+                        class="rounded-[10px] border border-white px-7 py-3 text-sm font-bold uppercase tracking-wide text-white transition-all duration-500 hover:bg-white hover:text-secondary cursor-pointer">
+                        Explore the Lodges
+                    </button>
+                </a>
+            </div>
+        </div>
+
+        <!-- Scroll cue -->
+        <a href="#about" aria-label="Scroll to content"
+            class="reveal absolute bottom-8 left-1/2 z-10 -translate-x-1/2 text-white/80 transition-colors hover:text-white animate-bounce"
+            style="--rd:.55s">
+            <i class="fa fa-angle-down text-3xl"></i>
+        </a>
+    </section>
+
+
+    <section id="about" class="our-cottage bg-white px-6 py-20 max-[745px]:py-16">
+        <div class="scroll mx-auto flex max-w-[760px] flex-col items-center text-center">
+            <img src="images/woodlandsparklogonotext.png" alt="" class="w-[130px] opacity-40">
+            <span class="mt-5 text-xs font-bold uppercase tracking-[0.28em] text-secondary/55">Welcome</span>
+            <h2 class="mt-3 font-heading leading-tight text-secondary text-[clamp(1.75rem,3.4vw,2.4rem)]">
+                Comfort, space and stunning countryside views
+            </h2>
+            <div class="mt-6 space-y-4 text-base font-thin leading-7 text-secondary/75">
+                <p>
+                    Each lodge offers comfortable, bright and airy, open-plan living with stunning views from every
+                    window. You&rsquo;ll find a spacious kitchen, dining and living area, three generous bedrooms and a
+                    family bathroom &mdash; perfect for families and groups of up to six.
+                </p>
+                <p>
+                    Step outside to a secure decking area with a luxurious private hot tub and comfortable outdoor
+                    furniture &mdash; the perfect spot to unwind and soak up the calm, tranquil surroundings.
+                </p>
+                <p>
+                    And because every lodge is step-free and easy to get around, with an en-suite wet room and
+                    adaptable equipment available on request, everyone can relax with ease &mdash; whatever your needs.
+                </p>
+            </div>
+        </div>
+    </section>
+
+
+    <section id="lodges" class="bg-white px-[8%] max-[745px]:px-6 py-20 max-[745px]:py-14">
+        <!-- Section header -->
+        <div class="scroll mx-auto flex max-w-[760px] flex-col items-center text-center">
+            <img src="images/woodlandsparklogonotext.png" alt="" class="w-[130px] opacity-40">
+            <span class="mt-5 text-xs font-bold uppercase tracking-[0.28em] text-secondary/55">Our Lodges</span>
+            <h2 class="mt-3 font-heading leading-tight text-secondary text-[clamp(1.75rem,3.4vw,2.4rem)]">
+                Two unique lodges. Designed for everyone.
+            </h2>
+            <p class="mt-4 max-w-[620px] text-base font-thin leading-relaxed text-secondary/70">
+                Two beautifully finished lodges with the same exceptional comfort &mdash; each with its own style,
+                colour and character, and easy step-free access throughout.
+            </p>
+        </div>
+
+        <!-- Cards -->
+        <div class="scroll mx-auto mt-14 flex max-w-[1080px] flex-col gap-10">
+
+            <!-- Chestnut Lodge (teal) -->
+            <article
+                class="grid overflow-hidden rounded-[20px] bg-white border border-black/[0.06] shadow-[0_12px_30px_-22px_rgba(0,0,0,0.22)] md:grid-cols-[5fr_6fr]">
+                <div class="order-2 flex flex-col justify-center bg-chestnut/[0.06] p-9 md:p-12 max-[745px]:p-7 md:order-1">
+                    <h3 class="font-heading text-[26px] uppercase tracking-wide text-chestnut">Chestnut Lodge</h3>
+                    <p class="mt-2 font-script text-[30px] font-medium leading-tight text-secondary/90">Calm. Coastal. Pet friendly.</p>
+                    <p class="mt-5 text-base font-thin leading-[26px] text-secondary/80">
+                        A luxurious retreat with bold teal accents and warm, contemporary styling. Spacious open-plan
+                        living opens onto an enclosed deck with a sunken private hot tub &mdash; and your dog is welcome
+                        too.
+                    </p>
+                    <ul class="mt-6 flex flex-col gap-3">
+                        <li class="flex items-center gap-3">
+                            <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-chestnut text-[11px] text-white"><i class="fa fa-check"></i></span>
+                            <span class="text-[15px] text-secondary">Sleeps up to 6 guests</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-chestnut text-[11px] text-white"><i class="fa fa-check"></i></span>
+                            <span class="text-[15px] text-secondary">3 spacious bedrooms</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-chestnut text-[11px] text-white"><i class="fa fa-check"></i></span>
+                            <span class="text-[15px] text-secondary">Sunken private hot tub</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-chestnut text-[11px] text-white"><i class="fa fa-check"></i></span>
+                            <span class="text-[15px] text-secondary">Step-free &amp; easy access</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-chestnut text-[11px] text-white"><i class="fa fa-check"></i></span>
+                            <span class="text-[15px] text-secondary">Pet friendly (1 dog)</span>
+                        </li>
+                    </ul>
+                    <a href="https://www.hoseasons.co.uk/accom/woodlands-park-lodges-at-haystax-hhll/chestnut-lodge-pf-vip-lp23240"
+                        target="_blank"
+                        class="group/link mt-8 inline-flex items-center gap-3 text-sm font-bold uppercase tracking-wide text-chestnut">
+                        View Chestnut Lodge
+                        <i class="fa fa-long-arrow-right transition-transform duration-300 group-hover/link:translate-x-1"></i>
+                    </a>
+                </div>
+                <div class="order-1 min-h-[300px] md:min-h-[460px] md:order-2">
+                    <img src="images/chestnut1.jpg" alt="Inside Chestnut Lodge with its teal feature wall"
+                        class="h-full w-full object-cover">
+                </div>
+            </article>
+
+            <!-- Cherry Lodge (mustard) -->
+            <article
+                class="grid overflow-hidden rounded-[20px] bg-white border border-black/[0.06] shadow-[0_12px_30px_-22px_rgba(0,0,0,0.22)] md:grid-cols-[6fr_5fr]">
+                <div class="order-2 flex flex-col justify-center bg-cherry/[0.08] p-9 md:p-12 max-[745px]:p-7 md:order-2">
+                    <h3 class="font-heading text-[26px] uppercase tracking-wide text-cherry">Cherry Lodge</h3>
+                    <p class="mt-2 font-script text-[30px] font-medium leading-tight text-secondary/90">Warm. Bright. Inviting.</p>
+                    <p class="mt-5 text-base font-thin leading-[26px] text-secondary/80">
+                        A luxurious retreat with a sunlit mustard-gold feature wall and warm, contemporary style.
+                        Bright open-plan living and a private hot tub on the decking &mdash; a relaxing, pet-free
+                        countryside base.
+                    </p>
+                    <ul class="mt-6 flex flex-col gap-3">
+                        <li class="flex items-center gap-3">
+                            <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-cherry text-[11px] text-white"><i class="fa fa-check"></i></span>
+                            <span class="text-[15px] text-secondary">Sleeps up to 6 guests</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-cherry text-[11px] text-white"><i class="fa fa-check"></i></span>
+                            <span class="text-[15px] text-secondary">3 spacious bedrooms</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-cherry text-[11px] text-white"><i class="fa fa-check"></i></span>
+                            <span class="text-[15px] text-secondary">Private hot tub</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-cherry text-[11px] text-white"><i class="fa fa-check"></i></span>
+                            <span class="text-[15px] text-secondary">Step-free &amp; easy access</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-cherry text-[11px] text-white"><i class="fa fa-check"></i></span>
+                            <span class="text-[15px] text-secondary">Pet-free</span>
+                        </li>
+                    </ul>
+                    <a href="https://www.hoseasons.co.uk/accom/woodlands-park-lodges-at-haystax-hhll/cherry-lodge-lp23241"
+                        target="_blank"
+                        class="group/link mt-8 inline-flex items-center gap-3 text-sm font-bold uppercase tracking-wide text-cherry">
+                        View Cherry Lodge
+                        <i class="fa fa-long-arrow-right transition-transform duration-300 group-hover/link:translate-x-1"></i>
+                    </a>
+                </div>
+                <div class="order-1 min-h-[300px] md:min-h-[460px] md:order-1">
+                    <img src="images/cherry3.jpg" alt="Inside Cherry Lodge with its mustard-gold feature wall"
+                        class="h-full w-full object-cover">
+                </div>
+            </article>
+        </div>
+    </section>
+
+
+    <section id="gallery" class="flex flex-wrap px-[10%] py-[5%] max-[745px]:p-[30px] bg-[#181818] text-body">
+        <div class="scroll shrink-0 w-1/2 max-[745px]:w-full">
+            <div class="flex flex-wrap">
+                <div class="scroll shrink-0 w-full">
+                    <div class="group relative rounded-[10px] m-[10px] overflow-hidden">
+                        <img src="images/cherry4.jpg" alt=""
+                            class="max-w-full inline-block align-middle transition-transform duration-300 group-hover:scale-110">
+                    </div>
+                </div>
+                <div class="scroll shrink-0 w-full">
+                    <div class="group relative rounded-[10px] m-[10px] overflow-hidden">
+                        <img src="images/chestnut1.jpg" alt=""
+                            class="min-h-full min-w-full max-w-full inline-block align-middle transition-transform duration-300 group-hover:scale-110">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="shrink-0 w-1/2 max-[745px]:w-full">
+            <div class="flex flex-wrap">
+                <div class="scroll shrink-0 w-full">
+                    <div class="group relative rounded-[10px] m-[10px] overflow-hidden">
+                        <img src="images/cherry3.jpg" alt=""
+                            class="min-h-full min-w-full max-w-full inline-block align-middle transition-transform duration-300 group-hover:scale-110">
+                    </div>
+                </div>
+                <div class="scroll shrink-0 w-full">
+                    <div class="group relative rounded-[10px] m-[10px] overflow-hidden">
+                        <img src="images/chestnut2.jpg" alt=""
+                            class="max-w-full inline-block align-middle transition-transform duration-300 group-hover:scale-110">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="shrink-0 w-1/2 max-[745px]:w-full">
+            <div class="flex flex-wrap">
+                <div class="scroll shrink-0 w-full">
+                    <div class="group relative rounded-[10px] m-[10px] overflow-hidden">
+                        <img src="images/cherry6.jpg" alt=""
+                            class="max-w-full inline-block align-middle transition-transform duration-300 group-hover:scale-110">
+                    </div>
+                </div>
+                <div class="scroll shrink-0 w-full">
+                    <div class="group relative rounded-[10px] m-[10px] overflow-hidden">
+                        <img src="images/cherry5.jpg" alt=""
+                            class="min-h-full min-w-full max-w-full inline-block align-middle transition-transform duration-300 group-hover:scale-110">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="shrink-0 w-1/2 max-[745px]:w-full">
+            <div class="flex flex-wrap">
+                <div class="scroll shrink-0 w-full">
+                    <div class="group relative rounded-[10px] m-[10px] overflow-hidden">
+                        <img src="images/chestnut4.jpg" alt=""
+                            class="min-h-full min-w-full max-w-full inline-block align-middle transition-transform duration-300 group-hover:scale-110">
+                    </div>
+                </div>
+                <div class="scroll shrink-0 w-1/2">
+                    <div class="group relative rounded-[10px] m-[10px] overflow-hidden">
+                        <img src="images/cherry7.jpg" alt=""
+                            class="max-w-full inline-block align-middle transition-transform duration-300 group-hover:scale-110">
+                    </div>
+                </div>
+                <div class="scroll shrink-0 w-1/2">
+                    <div class="group relative rounded-[10px] m-[10px] overflow-hidden">
+                        <img src="images/chestnut3.jpg" alt=""
+                            class="max-w-full inline-block align-middle transition-transform duration-300 group-hover:scale-110">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <section id="amenitites" class="bg-white px-6 py-20 max-[745px]:py-16">
+        <div class="scroll mx-auto flex max-w-[700px] flex-col items-center text-center">
+            <img src="images/woodlandsparklogonotext.png" alt="" class="w-[130px] opacity-40">
+            <span class="mt-5 text-xs font-bold uppercase tracking-[0.28em] text-secondary/55">Amenities</span>
+            <h2 class="mt-3 font-heading leading-tight text-secondary text-[clamp(1.75rem,3.4vw,2.4rem)]">
+                Everything you need for a relaxing stay
+            </h2>
+            <p class="mt-4 text-base font-thin leading-relaxed text-secondary/70">
+                Thoughtfully equipped for a relaxing countryside escape, with all the modern comforts &mdash; and easy,
+                step-free access throughout.
+            </p>
+        </div>
+
+        <div class="scroll mx-auto mt-12 grid max-w-[860px] grid-cols-3 sm:grid-cols-6 gap-x-4 gap-y-10">
+            <div class="flex flex-col items-center gap-3">
+                <div class="flex h-12 items-center justify-center">
+                    <img src="images/wifi.svg" alt="" class="max-h-9 w-auto object-contain">
+                </div>
+                <p class="text-[13px] font-semibold uppercase tracking-wide text-secondary">WiFi</p>
+            </div>
+            <div class="flex flex-col items-center gap-3">
+                <div class="flex h-12 items-center justify-center">
+                    <img src="images/hottub.svg" alt="" class="max-h-9 w-auto object-contain">
+                </div>
+                <p class="text-[13px] font-semibold uppercase tracking-wide text-secondary">Hot Tub</p>
+            </div>
+            <div class="flex flex-col items-center gap-3">
+                <div class="flex h-12 items-center justify-center">
+                    <img src="images/bbq.png" alt="" class="max-h-9 w-auto object-contain">
+                </div>
+                <p class="text-[13px] font-semibold uppercase tracking-wide text-secondary">Gas BBQ</p>
+            </div>
+            <div class="flex flex-col items-center gap-3">
+                <div class="flex h-12 items-center justify-center">
+                    <img src="images/wheelchair.svg" alt="" class="max-h-9 w-auto object-contain">
+                </div>
+                <p class="text-[13px] font-semibold uppercase tracking-wide text-secondary">Accessible</p>
+            </div>
+            <div class="flex flex-col items-center gap-3">
+                <div class="flex h-12 items-center justify-center">
+                    <img src="images/people.png" alt="" class="max-h-9 w-auto object-contain">
+                </div>
+                <p class="text-[13px] font-semibold uppercase tracking-wide text-secondary">Sleeps 6</p>
+            </div>
+            <div class="flex flex-col items-center gap-3">
+                <div class="flex h-12 items-center justify-center">
+                    <img src="images/bed.png" alt="" class="max-h-9 w-auto object-contain">
+                </div>
+                <p class="text-[13px] font-semibold uppercase tracking-wide text-secondary">3 Bedrooms</p>
+            </div>
+        </div>
+    </section>
+
+
+
+
+    <section id="contact" class="bg-white px-6 py-20 max-[745px]:py-14">
+        <div class="scroll mx-auto max-w-[1140px]">
+            <!-- Header -->
+            <div class="flex flex-col items-center text-center">
+                <img src="images/woodlandsparklogonotext.png" alt="" class="w-[130px] opacity-40">
+                <span class="mt-5 text-xs font-bold uppercase tracking-[0.28em] text-secondary/55">Contact Us</span>
+                <h2 class="mt-3 font-heading leading-tight text-secondary text-[clamp(1.75rem,3.4vw,2.4rem)]">
+                    We&rsquo;d love to hear from you
+                </h2>
+                <p class="mt-4 max-w-[560px] text-base font-thin leading-relaxed text-secondary/70">
+                    Whether you have a question about your stay, need more information, or want to make a booking,
+                    we&rsquo;re here to help.
+                </p>
+            </div>
+
+            <!-- Map + details: two balanced blocks -->
+            <div class="mt-12 grid gap-6 lg:grid-cols-2 lg:items-stretch">
+
+                <!-- Map -->
+                <div class="relative min-h-[380px] overflow-hidden rounded-2xl border border-black/[0.07] shadow-[0_12px_30px_-22px_rgba(0,0,0,0.18)]">
+                    <div id="map" class="absolute inset-0 h-full w-full"></div>
+                    <a href="https://www.openstreetmap.org/directions?to=54.81768%2C-1.81868" target="_blank"
+                        class="group absolute bottom-4 left-4 z-[1000] inline-flex items-center gap-2 rounded-full bg-secondary px-5 py-2.5 text-[13px] font-bold uppercase tracking-wide text-white shadow-[0_6px_16px_-6px_rgba(0,0,0,0.5)] transition-colors hover:bg-black">
+                        <i class="fa fa-map-o"></i>
+                        Get directions
+                        <i class="fa fa-external-link text-xs opacity-70"></i>
+                    </a>
+                </div>
+
+                <!-- Details panel -->
+                <div class="flex flex-col rounded-2xl border border-black/[0.07] bg-[#f8f8f7] p-8 md:p-10 shadow-[0_12px_30px_-22px_rgba(0,0,0,0.18)]">
+                    <!-- Visit us -->
+                    <div class="flex items-start gap-4">
+                        <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-secondary/10 text-secondary">
+                            <i class="fa fa-map-marker text-lg"></i>
+                        </span>
+                        <div>
+                            <h3 class="text-[13px] font-bold uppercase tracking-[0.18em] text-secondary/70">Visit us</h3>
+                            <a href="https://www.google.com/maps/search/?api=1&query=Woodlands+Park+Lodges+at+Haystax+Knitsley+Consett+DH8+9EZ"
+                                target="_blank"
+                                class="group mt-2 inline-flex items-center gap-2 text-[16px] text-secondary transition-colors hover:text-secondary/70">
+                                Knitsley, County Durham &middot; DH8 9EZ
+                                <i class="fa fa-external-link text-xs text-secondary/40 transition-transform duration-300 group-hover:translate-x-0.5"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="my-6 h-px w-full bg-black/[0.08]"></div>
+
+                    <!-- Get in touch -->
+                    <div class="flex items-center gap-4">
+                        <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-secondary/10 text-secondary">
+                            <i class="fa fa-envelope-o text-lg"></i>
+                        </span>
+                        <h3 class="text-[13px] font-bold uppercase tracking-[0.18em] text-secondary/70">Get in touch</h3>
+                    </div>
+
+                    <div class="mt-2 flex flex-col divide-y divide-black/[0.06]">
+                        <a href="https://www.facebook.com/profile.php?id=61568244574218" target="_blank"
+                            class="group flex items-center gap-4 py-3.5">
+                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-sm text-white">
+                                <i class="fa fa-facebook-f"></i></span>
+                            <span class="flex-1 text-[15px] text-secondary">Woodlands Park Lodges</span>
+                            <i class="fa fa-angle-right text-secondary/40 transition-transform duration-300 group-hover:translate-x-1"></i>
+                        </a>
+                        <a href="https://www.instagram.com/woodlandspark_lodges" target="_blank"
+                            class="group flex items-center gap-4 py-3.5">
+                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-sm text-white">
+                                <i class="fa fa-instagram"></i></span>
+                            <span class="flex-1 text-[15px] text-secondary">@woodlandspark_lodges</span>
+                            <i class="fa fa-angle-right text-secondary/40 transition-transform duration-300 group-hover:translate-x-1"></i>
+                        </a>
+                        <a href="mailto:bookings@wpfarm.co.uk" class="group flex items-center gap-4 py-3.5">
+                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-sm text-white">
+                                <i class="fa fa-envelope-o"></i></span>
+                            <span class="flex-1 text-[15px] text-secondary">bookings@wpfarm.co.uk</span>
+                            <i class="fa fa-angle-right text-secondary/40 transition-transform duration-300 group-hover:translate-x-1"></i>
+                        </a>
+                        <a href="tel:07900727699" class="group flex items-center gap-4 py-3.5">
+                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-sm text-white">
+                                <i class="fa fa-whatsapp"></i></span>
+                            <span class="flex-1 text-[15px] text-secondary">07900 727699</span>
+                            <i class="fa fa-angle-right text-secondary/40 transition-transform duration-300 group-hover:translate-x-1"></i>
+                        </a>
+                    </div>
+
+                    <!-- CTA -->
+                    <a href="mailto:bookings@wpfarm.co.uk?subject=Enquiry%20%E2%80%93%20Woodlands%20Park%20Lodges"
+                        class="group mt-7 flex items-center justify-center gap-2 rounded-[10px] bg-secondary px-6 py-3.5 text-[13px] font-bold uppercase tracking-wide text-white transition-colors duration-500 hover:bg-black">
+                        Send us a message
+                        <i class="fa fa-angle-right transition-transform duration-300 group-hover:translate-x-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-[#181818] text-white">
+        <div class="mx-auto max-w-[1140px] px-8 py-14 max-[745px]:px-6">
+            <div class="flex flex-col items-center gap-8 md:flex-row md:justify-between">
+                <a href="#home" class="shrink-0">
+                    <img src="images/LodgesLogo.png" alt="Woodlands Park Lodges"
+                        class="h-12 w-auto opacity-90 brightness-0 invert">
+                </a>
+                <nav>
+                    <ul class="flex flex-wrap items-center justify-center gap-x-7 gap-y-3">
+                        <li><a href="#home"
+                                class="text-sm uppercase tracking-wide text-white/65 transition-colors hover:text-white">Home</a>
+                        </li>
+                        <li><a href="#about"
+                                class="text-sm uppercase tracking-wide text-white/65 transition-colors hover:text-white">About</a>
+                        </li>
+                        <li><a href="#lodges"
+                                class="text-sm uppercase tracking-wide text-white/65 transition-colors hover:text-white">The
+                                Lodges</a></li>
+                        <li><a href="#gallery"
+                                class="text-sm uppercase tracking-wide text-white/65 transition-colors hover:text-white">Gallery</a>
+                        </li>
+                        <li><a href="#amenitites"
+                                class="text-sm uppercase tracking-wide text-white/65 transition-colors hover:text-white">Amenities</a>
+                        </li>
+                        <li><a href="#contact"
+                                class="text-sm uppercase tracking-wide text-white/65 transition-colors hover:text-white">Contact</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
+            <div class="my-9 h-px w-full bg-white/10"></div>
+
+            <div class="flex flex-col items-center gap-4 text-sm text-white/45 md:flex-row md:justify-between">
+                <p>&copy; 2026 Woodlands Park Lodges. All rights reserved.</p>
+                <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+                    <button id="openPdfButton" class="transition-colors hover:text-white/80">Privacy Policy</button>
+                    <span class="h-3 w-px bg-white/15 max-[745px]:hidden"></span>
+                    <a href="https://github.com/Kieran-Riley1" target="_blank"
+                        class="text-white/45 transition-colors hover:text-white/80">Web Design: Kieran Riley</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="main.js"></script>
+
+
+</body>
+
+</html>
